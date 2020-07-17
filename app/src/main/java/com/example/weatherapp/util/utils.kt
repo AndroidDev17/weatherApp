@@ -1,9 +1,12 @@
-package com.example.weatherapp
+package com.example.weatherapp.util
 
 import android.content.Context
 import android.location.Location
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.Toast
+import com.example.weatherapp.BuildConfig
 
 fun Context.toast(message: String?) {
     Toast.makeText(this, message ?: "null", Toast.LENGTH_LONG).show()
@@ -39,5 +42,10 @@ fun sharedPrefStringToLocation(locationStr: String): Location? {
     }
     return null
 }
-
+fun ProgressBar.visible() {
+    visibility = View.VISIBLE
+}
+fun ProgressBar.hide() {
+    visibility = View.GONE
+}
 fun convertToCelsius(temp:String) = "$temp \u2103"

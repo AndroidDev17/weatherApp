@@ -1,25 +1,25 @@
 package com.example.weatherapp.ui
 
-import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.example.weatherapp.*
+import com.example.weatherapp.R
+import com.example.weatherapp.WeatherApp
 import com.example.weatherapp.data.CurrentWeather
+import com.example.weatherapp.data.Status
 import com.example.weatherapp.services.MyLocationProvider
 import com.example.weatherapp.services.WeatherApi
+import com.example.weatherapp.util.*
 import kotlinx.android.synthetic.main.fragment_first.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import javax.annotation.Resource
 import javax.inject.Inject
 
 /**
@@ -79,12 +79,36 @@ class WeatherFragment : Fragment() {
         viewModel.loadDataFromLastLocation()
         viewModel.currentWeather.observe(viewLifecycleOwner, Observer {
             val textData = "status ${it.status} ::data ${it.data} ::msg ${it.message}"
-            it.data?.let {
-                bindData(it)
-            }
             log(TAG, message = textData)
+            when (it.status) {
+                Status.LOADING -> {
+                    bindLoadingData()
+                }
+                Status.SUCCESS -> {
+                    bindSuccessData(it.data)
+                }
+                Status.ERROR -> {
+                    bindErrorData(it.message)
+                }
+            }
         })
 
+    }
+
+    private fun bindErrorData(message: String?) {
+        progressBar.hide()
+        requireActivity().toast(message ?: "Unknown error")
+    }
+
+    private fun bindSuccessData(weather: CurrentWeather?) {
+        progressBar.hide()
+        weather?.let {
+            bindData(it)
+        }
+    }
+
+    private fun bindLoadingData() {
+        progressBar.visible()
     }
 
     private fun observeLocation() {
@@ -94,31 +118,39 @@ class WeatherFragment : Fragment() {
                 val locationText = "lat :: ${location.latitude} , long :: ${location.longitude}"
                 log(TAG, locationText)
                 viewModel.storeLastLocation(location)
-                viewModel.loadLocation(location.latitude, location.longitude)
+                viewModel.updateLocation(location)
             }
         }
     }
 
     private fun bindData(weather: CurrentWeather) {
-        tv_location.text = weather.location.name
-        val description = weather.current.descriptions?.get(0)
-        description?.let {
-            tv_weather.text = it
-        }
-        tv_temp.text = convertToCelsius(weather.current.temp)
-        weather.current.icons?.get(0)?.let {
-            Glide.with(imageView)
-                .load(it)
-                .into(imageView)
-        }
-        root.setBackgroundColor(
-            if (weather.current.isDay.equals("yes", true)) {
-                R.color.day_blue
-            } else {
-                R.color.night_black
+        if (weather.success == false
+            && weather.error != null
+        ) {
+            requireActivity().toast(weather.error.info)
+        } else {
+            tv_location.text = weather.location.name
+            val description = weather.current.descriptions?.get(0)
+            description?.let {
+                tv_weather.text = it
             }
-        )
+            tv_temp.text =
+                convertToCelsius(weather.current.temp)
+            weather.current.icons?.get(0)?.let {
+                Glide.with(imageView)
+                    .load(it)
+                    .into(imageView)
+            }
+            root.setBackgroundColor(
+                if (weather.current.isDay.equals("yes", true)) {
+                    R.color.day_blue
+                } else {
+                    R.color.night_black
+                }
+            )
+        }
 
     }
 
 }
+

@@ -1,9 +1,8 @@
 package com.example.weatherapp.di.module
 
-import com.example.weatherapp.BASE_URL
-import com.example.weatherapp.reposetory.LiveDataCallAdapterFactory
+import com.example.weatherapp.util.BASE_URL
+import com.example.weatherapp.network.DeferredCallAdapterFactory
 import com.example.weatherapp.services.WeatherApi
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -21,7 +20,7 @@ object NetworkModule {
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(LiveDataCallAdapterFactory())
+            .addCallAdapterFactory(DeferredCallAdapterFactory())
             .build()
             .create(WeatherApi::class.java)
     }

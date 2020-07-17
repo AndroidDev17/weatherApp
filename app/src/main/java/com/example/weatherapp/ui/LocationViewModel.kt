@@ -2,18 +2,15 @@ package com.example.weatherapp.ui
 
 import android.location.Location
 import androidx.lifecycle.*
-import com.example.weatherapp.ACCESS_KEY
+import com.example.weatherapp.util.ACCESS_KEY_WEATHER_STACK
 import com.example.weatherapp.EmptyLiveData
-import com.example.weatherapp.data.CurrentWeather
-import com.example.weatherapp.reposetory.Resource
 import com.example.weatherapp.reposetory.WeatherRepository
 import com.example.weatherapp.services.IAccessKeyProvider
-import com.example.weatherapp.sharedPrefStringToLocation
+import com.example.weatherapp.util.sharedPrefStringToLocation
 import com.example.weatherapp.storage.KeyStoreProvider
 import com.example.weatherapp.storage.LAST_KNOW_LOCATION
-import com.example.weatherapp.toSharedPrefString
+import com.example.weatherapp.util.toSharedPrefString
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class LocationViewModel @Inject constructor(
@@ -27,16 +24,17 @@ class LocationViewModel @Inject constructor(
         if (location == null) {
             EmptyLiveData.create()
         } else {
-            weatherRepository.loadCurrentWeather(ACCESS_KEY,location.latitude,location.longitude)
-        }
-    }
+            val loadCurrentWeather = weatherRepository.loadCurrentWeather(
+                ACCESS_KEY_WEATHER_STACK,
+                location.latitude,
+                location.longitude
+            )
+            viewModelScope.launch {
+                loadCurrentWeather.begin()
+            }
+            loadCurrentWeather.asLiveData()
 
-    fun loadLocation(
-        latitude: Double,
-        longitude: Double
-    ): LiveData<Resource<CurrentWeather>> {
-//        val accessToken = runBlocking{ tokenProvider.provideAccessKey() }
-        return weatherRepository.loadCurrentWeather(ACCESS_KEY,latitude,longitude)
+        }
     }
 
     fun storeLastLocation(location: Location) {
@@ -52,11 +50,16 @@ class LocationViewModel @Inject constructor(
         viewModelScope.launch {
             val location = keyStore.userSetting.getString(LAST_KNOW_LOCATION, "")
             location?.let {
-                sharedPrefStringToLocation(location)?.let {
+                sharedPrefStringToLocation(location)
+                    ?.let {
                     _currentLocation.value = (it)
                 }
             }
         }
+    }
+
+    fun updateLocation(location:Location?) {
+        _currentLocation.value = location
     }
 
 }

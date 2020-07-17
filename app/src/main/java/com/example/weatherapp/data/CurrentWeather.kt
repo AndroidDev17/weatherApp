@@ -1,23 +1,21 @@
 package com.example.weatherapp.data
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "weather")
-data class CurrentWeather (
+data class CurrentWeather(
     @field:SerializedName("location")
-    @field:Embedded(prefix = "Location_")
-    val location : Location,
+    val location: Location,
     @field:SerializedName("current")
-    @Embedded (prefix = "current_")
-    val current : Weather
+    val current: Weather,
+    @field:SerializedName("error")
+    val error: Error?,
+    @field:SerializedName("success")
+    val success: Boolean?
 ) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Int =0
-    data class Location (
+    var id: Int = 0
+
+    data class Location(
         val id: Int,
         @field:SerializedName("name")
         val name: String,
@@ -26,13 +24,12 @@ data class CurrentWeather (
         @field:SerializedName("region")
         val region: String,
         @field:SerializedName("lat")
-        @ColumnInfo(name = "latitude")
         val lat: String,
         @field:SerializedName("lon")
-        @ColumnInfo(name = "longitude")
         val lon: String
     )
-    data class Weather (
+
+    data class Weather(
         @field:SerializedName("observation_time")
         val time: String,
         @field:SerializedName("temperature")
@@ -47,5 +44,14 @@ data class CurrentWeather (
         val visibility: String,
         @field:SerializedName("is_day")
         val isDay: String
+    )
+
+    data class Error(
+        @field:SerializedName("code")
+        val code: Int,
+        @field:SerializedName("type")
+        val type: String,
+        @field:SerializedName("info")
+        val info: String
     )
 }

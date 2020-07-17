@@ -1,4 +1,4 @@
-package com.example.weatherapp.reposetory
+package com.example.weatherapp.data
 
 /**
  * data request status

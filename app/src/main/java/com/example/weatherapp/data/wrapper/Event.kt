@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.data.wrapper
 
 import androidx.lifecycle.Observer
 

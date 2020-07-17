@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.di
 import androidx.lifecycle.ViewModel
 import dagger.MapKey
 import kotlin.reflect.KClass

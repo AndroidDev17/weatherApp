@@ -3,18 +3,16 @@ package com.example.weatherapp.services
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
-import com.example.weatherapp.log
+import com.example.weatherapp.util.log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
-
+@SuppressLint("MissingPermission")
 @ExperimentalCoroutinesApi
 class MyLocationProvider constructor(private val client: FusedLocationProviderClient) {
 
@@ -29,8 +27,9 @@ class MyLocationProvider constructor(private val client: FusedLocationProviderCl
     // provides location for
     val location: Flow<Location>
 
-    init {
+   init {
         location = getLocationFlow()
+//       location.onStart<Any?> { emit(client.lastLocation) }
     }
 
 
@@ -58,6 +57,7 @@ class MyLocationProvider constructor(private val client: FusedLocationProviderCl
                 }
             }
         }
+
         val locationRequest = createLocationRequest(60, 30, 2)
 
         log(
