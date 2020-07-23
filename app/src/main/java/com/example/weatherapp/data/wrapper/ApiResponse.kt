@@ -1,5 +1,8 @@
 package com.example.weatherapp.data.wrapper
 
+import com.example.weatherapp.data.ApiError
+import com.example.weatherapp.util.UNKNOWN_ERROR_CODE
+import com.google.gson.Gson
 import retrofit2.Response
 import java.util.regex.Pattern
 

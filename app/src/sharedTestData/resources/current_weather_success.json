@@ -1,0 +1,43 @@
+{
+  "coord": {
+    "lon": 77.03,
+    "lat": 28.46
+  },
+  "weather": [
+    {
+      "id": 301,
+      "main": "Drizzle",
+      "description": "drizzle",
+      "icon": "09d"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 301.15,
+    "feels_like": 306.15,
+    "temp_min": 301.15,
+    "temp_max": 301.15,
+    "pressure": 998,
+    "humidity": 78
+  },
+  "visibility": 4000,
+  "wind": {
+    "speed": 1,
+    "deg": 40
+  },
+  "clouds": {
+    "all": 75
+  },
+  "dt": 1595235282,
+  "sys": {
+    "type": 1,
+    "id": 9165,
+    "country": "IN",
+    "sunrise": 1595203612,
+    "sunset": 1595252955
+  },
+  "timezone": 19800,
+  "id": 1270642,
+  "name": "Gurgaon",
+  "cod": 200
+}

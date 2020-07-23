@@ -6,8 +6,11 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [ContextModule::class, ViewModelProviderModule::class, LocationModule::class, NetworkModule::class, TokenProviderModule::class])
+@Component(modules = [ContextModule::class, ViewModelProviderModule::class, LocationModule::class,
+    NetworkModule::class, TokenProviderModule::class,RepoModule::class,KeyStoreModule::class])
 interface AppComponent {
 
     fun inject(fragment: WeatherFragment)
+
+    fun injectInto(glideApp: MyAppGlideModule)
 }

@@ -8,6 +8,7 @@ import dagger.Provides
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -28,4 +29,9 @@ object NetworkModule {
     @Singleton
     @Provides
     fun provideHttpClient(): OkHttpClient = OkHttpClient.Builder().build()
+
+    @Singleton
+    @Provides
+    @Named("memoryCacheSizeBytes")
+    fun provideCacheSize() : Long = 1024 * 1024 * 1 // 1 Mb
 }

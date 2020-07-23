@@ -2,43 +2,71 @@ package com.example.weatherapp.ui
 
 import android.location.Location
 import androidx.lifecycle.*
-import com.example.weatherapp.util.ACCESS_KEY_WEATHER_STACK
+import androidx.room.PrimaryKey
 import com.example.weatherapp.EmptyLiveData
+import com.example.weatherapp.reposetory.IWeatherRepository
 import com.example.weatherapp.reposetory.WeatherRepository
 import com.example.weatherapp.services.IAccessKeyProvider
-import com.example.weatherapp.util.sharedPrefStringToLocation
 import com.example.weatherapp.storage.KeyStoreProvider
 import com.example.weatherapp.storage.LAST_KNOW_LOCATION
-import com.example.weatherapp.util.toSharedPrefString
+import com.example.weatherapp.util.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class LocationViewModel @Inject constructor(
-    private val weatherRepository: WeatherRepository,
+class LocationViewModel (
+    private val weatherRepository: IWeatherRepository,
     private val tokenProvider: IAccessKeyProvider,
-    private val keyStore: KeyStoreProvider
+    private val keyStore: KeyStoreProvider,
+    coroutineScopeProvider: CoroutineScope?
 ) : ViewModel() {
+    @Inject
+    constructor(
+        weatherRepository: IWeatherRepository,
+        tokenProvider: IAccessKeyProvider,
+        keyStore: KeyStoreProvider
+    ) : this(weatherRepository, tokenProvider, keyStore, null)
+
     private val TAG = "LocationViewModel"
     private val _currentLocation = MutableLiveData<Location?>()
-    val currentWeather = _currentLocation.switchMap { location ->
+    private val coroutineScope = getViewModelScope(coroutineScopeProvider)
+    val currentWeather = _currentLocation.distinctUntilChanged().switchMap { location ->
         if (location == null) {
             EmptyLiveData.create()
         } else {
-            val loadCurrentWeather = weatherRepository.loadCurrentWeather(
-                ACCESS_KEY_WEATHER_STACK,
+            val loadTodaysWeather = weatherRepository.loadCurrentWeather(
                 location.latitude,
-                location.longitude
+                location.longitude,
+                TEMP_UNIT_CELSIUS,
+                ACCESS_KEY_OPEN_WEATHER
             )
-            viewModelScope.launch {
-                loadCurrentWeather.begin()
+            coroutineScope.launch {
+                log(TAG,"startFetchMethod")
+                loadTodaysWeather.begin()
             }
-            loadCurrentWeather.asLiveData()
-
+            loadTodaysWeather.asLiveData()
+        }
+    }
+    val weatherForecast = _currentLocation.distinctUntilChanged().switchMap { location ->
+        if (location == null) {
+            EmptyLiveData.create()
+        } else {
+            val loadSevenDaysForecast = weatherRepository.loadWeatherForecast(
+                location.latitude,
+                location.longitude,
+                EXCLUDE,
+                TEMP_UNIT_CELSIUS,
+                ACCESS_KEY_OPEN_WEATHER
+            )
+            coroutineScope.launch {
+                loadSevenDaysForecast.begin()
+            }
+            loadSevenDaysForecast.asLiveData()
         }
     }
 
     fun storeLastLocation(location: Location) {
-        viewModelScope.launch {
+        coroutineScope.launch {
             keyStore.userSetting.putAsyncString(
                 LAST_KNOW_LOCATION,
                 location.toSharedPrefString()
@@ -47,19 +75,23 @@ class LocationViewModel @Inject constructor(
     }
 
     fun loadDataFromLastLocation() {
-        viewModelScope.launch {
+        coroutineScope.launch {
             val location = keyStore.userSetting.getString(LAST_KNOW_LOCATION, "")
             location?.let {
                 sharedPrefStringToLocation(location)
                     ?.let {
-                    _currentLocation.value = (it)
-                }
+                        _currentLocation.value = (it)
+                    }
             }
         }
     }
 
-    fun updateLocation(location:Location?) {
-        _currentLocation.value = location
+    fun updateLocation(location: Location?) {
+        if (!location.isSame(_currentLocation.value)) {
+            _currentLocation.value = location
+        }
     }
-
 }
+
+
+
